@@ -31,3 +31,4 @@ MESSAGE(STATUS "Compiling with ${CMAKE_CXX_FLAGS}")
 
 add_executable(cache_aliasing cache_aliasing/test.cpp)
 add_executable(cache_usage cache_usage/test.cpp)
+add_executable(memmove memmove/test.cpp)
