@@ -14,6 +14,11 @@ Blog post about (Intel) cache organization:
 */
 
 int main(int argc, char const** argv) {
+    if (argc < 2) {
+        std::cout << "Usage: " << argv[0] << " <size>" << std::endl;
+        return 1;
+    }
+
     constexpr unsigned seed = 43581;
     std::mt19937_64 rng(seed);
 
