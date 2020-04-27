@@ -105,6 +105,9 @@ ax.legend(
     ncol = 3 if len(args.types) == 3 or len(args.types) == 6 else 2,
     fontsize = 9)
 
-pp = PdfPages(args.output_filename + '.pdf')
-pp.savefig(bbox_inches = 'tight')
-pp.close()
+# pdf output
+# pp = PdfPages(args.output_filename + '.pdf')
+# pp.savefig(bbox_inches = 'tight')
+# pp.close()
+
+plt.savefig(args.output_filename + '.png', bbox_inches = 'tight')
