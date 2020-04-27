@@ -4,7 +4,8 @@ Sorted sets with `memmove`
 Usage:
 
     ./memmove
--
+
+--
 
 Often we need to keep a sorted set of items. Classical solutions having log-time
 complexity involve search trees, like Red-Black or AVL.
@@ -21,14 +22,24 @@ Now, the question is: up to which set size (named `n` in the following)
 the `sorted_vector` is faster than,
 say, a regular `std::set` (Red-Black Tree)?
 
--
+--
 
 I run the `./memmove` program on my Intel i7 (@2.6 GHz) and obtained the following
 result. For this example, the sets store 4-byte signed keys.
 
-![](results/test_small.pdf)
+<!--![](results/test_small.pdf)
 
-![](results/test_large.pdf)
+![](results/test_large.pdf)-->
+
+<object data="results/test_small.pdf" type="application/pdf" width="100%" height="300px">
+    <embed src="results/test_small.pdf">
+    </embed>
+</object>
+
+<object data="results/test_large.pdf" type="application/pdf" width="100%" height="300px">
+    <embed src="results/test_large.pdf">
+    </embed>
+</object>
 
 The `sorted_vector` solution is faster (by ~2X) up to approximately 800 keys, then
 the difference starts to diminish till the curves finally cross around 2400.
@@ -37,7 +48,7 @@ Alright, if you have sets smaller than 2K keys, just stick to a `std::vector`:
 it will be faster, simpler, cache-friendly, space-efficient (no space overhead wrt
 a tree-shaped solution), and supports random access.
 
--
+--
 
 The plots can be draw by running:
 
