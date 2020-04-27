@@ -10,7 +10,7 @@
 #include "include/sorted_vector.hpp"
 
 template <typename Set>
-void test() {
+void test(std::string const& name) {
     typedef typename Set::value_type value_t;
     constexpr int MAX_SIZE = 4000;
     constexpr int width = 10;
@@ -28,11 +28,29 @@ void test() {
     std::cout << std::right << std::setw(width) << "----" << std::setw(width) << "---"
               << std::setw(width) << "---" << std::setw(width) << "---" << std::endl;
 
+    std::string json("{\"type\":\"" + name + "\", ");
+    json += "\"timings\":[";
+
     for (uint64_t size = 10; size <= MAX_SIZE; size += 10) {
         insertions.resize(size);
         uint64_t x = 0;
         std::generate(insertions.begin(), insertions.end(), [&] { return x++; });
         std::shuffle(insertions.begin(), insertions.end(), rng);
+
+        // unit test
+        // Set s;
+        // std::set<value_t> std_set;
+        // for (auto x : insertions) {
+        //     s.insert(x);
+        //     std_set.insert(x);
+        //     auto it = s.begin();
+        //     for (auto val : std_set) {
+        //         if (val != *it) {
+        //             std::cout << "expected " << val << " but got " << *it << std::endl;
+        //         }
+        //         ++it;
+        //     }
+        // }
 
         for (int run = 0; run != runs; ++run) {
             Set s;
@@ -49,12 +67,20 @@ void test() {
         std::cout << std::right << std::setw(width) << size << std::setw(width)
                   << ns_per_op(timings.front()) << std::setw(width) << ns_per_op(avg)
                   << std::setw(width) << ns_per_op(timings.back()) << std::endl;
+
+        json += "[" + std::to_string(ns_per_op(timings.front())) + "," +
+                std::to_string(ns_per_op(avg)) + "," + std::to_string(ns_per_op(timings.back())) +
+                "],";
     }
+
+    json.pop_back();
+    json += "]}";
+    std::cerr << json << std::endl;
 }
 
 int main() {
-    test<sorted_vector<int>>();
-    test<std::set<int>>();
+    test<sorted_vector<int>>("sorted_vector");
+    test<std::set<int>>("std::set");
     // TODO: add rotated vectors from https://www.ics.uci.edu/~goodrich/pubs/wads99.pdf
 
     return 0;

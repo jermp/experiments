@@ -56,9 +56,35 @@ struct sorted_vector {
         return m_capacity;
     }
 
-    void print() const {
-        for (uint64_t i = 0; i != m_size; ++i) { std::cout << m_data[i] << " "; }
-        std::cout << std::endl;
+    struct iterator {
+        iterator(T const* data, uint64_t pos = 0) : m_data(data + pos) {}
+
+        T const& operator*() {
+            return *m_data;
+        }
+
+        void operator++() {
+            ++m_data;
+        }
+
+        bool operator==(iterator const& rhs) {
+            return m_data == rhs.m_data;
+        }
+
+        bool operator!=(iterator const& rhs) {
+            return !(*this == rhs);
+        }
+
+    private:
+        T const* m_data;
+    };
+
+    iterator begin() {
+        return iterator(m_data);
+    }
+
+    iterator end() {
+        return iterator(m_data + m_size);
     }
 
     // double overhead() const {
