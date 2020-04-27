@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cassert>
+#include <cstring>  // memmove
+
 template <typename T>
 struct sorted_vector {
     typedef T value_type;
