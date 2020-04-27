@@ -2,6 +2,8 @@
 #include <vector>
 #include <random>
 #include <chrono>
+#include <algorithm>
+#include <numeric>
 
 constexpr uint64_t LINE_SIZE = 64;
 
