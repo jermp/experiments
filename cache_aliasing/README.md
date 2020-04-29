@@ -1,9 +1,11 @@
 Cache Aliasing
--
+--------------
 
 Usage:
 
 	./cache_aliasing <size>
+
+-------------
 
 On an Intel i9-9940X processor with the following L1 cache
 
@@ -20,3 +22,7 @@ cache set rather than *evenly* spread:
 	elapsed time: 10 [millisec]
 	# ignore 9765
 	elapsed time: 3 [millisec]
+	
+-------------
+	
+Learn more about Intel caches [here](https://manybutfinite.com/post/intel-cpu-caches/).
