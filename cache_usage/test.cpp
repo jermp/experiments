@@ -4,12 +4,13 @@
 #include <chrono>
 #include <algorithm>
 #include <numeric>
+#include <unordered_set>
 
 constexpr uint64_t LINE_SIZE = 64;
 
 struct cache {
     cache(uint64_t s, uint64_t w)
-        : size(s), ways(w), sets((size / LINE_SIZE) / ways), counters(sets, 0) {
+        : size(s), ways(w), sets((size / LINE_SIZE) / ways), counters(sets) {
         if (size % LINE_SIZE != 0) {
             throw std::runtime_error("cache size must be divisible by the line size");
         }
@@ -17,10 +18,10 @@ struct cache {
 
     template <typename T>
     void map(T const& x) {
-        uint64_t address = reinterpret_cast<uint64_t>(&x);
-        uint64_t set = (address / LINE_SIZE) % sets;  // or just take log2(sets) lowest bits, after
-                                                      // shifting to the right by log2(LINE_SIZE)
-        counters[set] += 1;
+        uint64_t cache_line = reinterpret_cast<uint64_t>(&x) / LINE_SIZE;
+        uint64_t set = cache_line % sets;
+        auto it = counters[set].find(cache_line);
+        if (it == counters[set].end()) { counters[set].insert(cache_line); }
     }
 
     void print_usage() const {
@@ -29,26 +30,27 @@ struct cache {
         std::cout << "  ways " << ways << "\n";
         std::cout << "  sets " << sets << "\n";
         std::cout << "cache usage:\n";
-        for (uint64_t i = 0; i != sets; ++i) {
-            // std::cout << "set " << i << ": " << counters[i] << "\n";
-            std::cout << counters[i] << " ";
-        }
+        for (uint64_t i = 0; i != sets; ++i) { std::cout << counters[i].size() << " "; }
         std::cout << std::endl;
     }
 
     void clear() {
-        std::fill(counters.begin(), counters.end(), 0);
+        for (auto& c : counters) c.clear();
     }
 
     uint64_t accesses() const {
-        return std::accumulate(counters.begin(), counters.end(), 0);
+        uint64_t sum = 0;
+        for (auto const& c : counters) sum += c.size();
+        return sum;
     }
 
 private:
     uint64_t size;  // in bytes
     uint64_t ways;
     uint64_t sets;
-    std::vector<uint64_t> counters;  // the number of addresses that are mapped to a set
+    std::vector<std::unordered_set<uint64_t>>
+        counters;  // counters[i] := the number of distinct cache lines
+                   // that would be stored in set i
 };
 
 #include "include/segment_trees.hpp"
