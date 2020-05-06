@@ -25,6 +25,13 @@ struct fenwick_tree {
         return sum;
     }
 
+    // void update(uint64_t i, int64_t delta, cache& c) {
+    //     for (++i; i < size(); i += i & -i) {
+    //         c.map(m_tree[i]);
+    //         m_tree[i] += delta;
+    //     }
+    // }
+
     uint64_t size() const {
         return m_tree.size();
     }
@@ -57,6 +64,13 @@ struct fenwick_tree_holes {
             sum += m_tree[pos(i)];
         }
         return sum;
+    }
+
+    void update(uint64_t i, int64_t delta, cache& c) {
+        for (++i; i <= m_size; i += i & -i) {
+            c.map(m_tree[pos(i)]);
+            m_tree[pos(i)] += delta;
+        }
     }
 
     uint64_t size() const {
