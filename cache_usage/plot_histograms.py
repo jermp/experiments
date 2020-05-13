@@ -46,10 +46,12 @@ gray = '#969696'
 
 # color, marker, alpha, name
 info = {
-    "ft":       ["#de2d26",'s', 1, r'FT', '-'],
-    "ft_holes": ["#31a354",'o', 1, r'FT with holes', '-'],
-    "st_td":    ["#3182bd",'o', 1, r'ST top-down', '-'],
-    "st_bu":    ["#fe9929",'o', 1, r'ST bottom-up', '-'],
+    "ft":                   ["#de2d26",'s', 1, r'FT', '-'],
+    "ft_holes":             ["#31a354",'o', 1, r'FT with holes', '-'],
+    "ft_blocked_64":        ["#de2d26",'o', 1, r'FT blocked 64', '-'],
+    "ft_blocked_64_holes":  ["#31a354",'o', 1, r'FT blocked 64 with holes', '-'],
+    "st_td":                ["#3182bd",'o', 1, r'ST top-down', '-'],
+    "st_bu":                ["#fe9929",'o', 1, r'ST bottom-up', '-'],
 }
 
 # axes = plt.gca()

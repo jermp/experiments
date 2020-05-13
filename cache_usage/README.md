@@ -35,6 +35,10 @@ For example, the following plots show the result of running the program with
 
 ![](results/ft_holes.png)
 
+![](results/ft_blocked_64.png)
+
+![](results/ft_blocked_64_holes.png)
+
 ![](results/st_td.png)
 
 ![](results/st_bu.png)
@@ -45,6 +49,8 @@ The plots can be draw by running:
 
     python3 plot_histograms.py results/ft_results.txt ft
     python3 plot_histograms.py results/ft_holes_results.txt ft_holes
+    python3 plot_histograms.py results/ft_blocked_64_results.txt ft_blocked_64
+    python3 plot_histograms.py results/ft_blocked_64_holes_results.txt ft_blocked_64_holes
     python3 plot_histograms.py results/st_td_results.txt st_td
     python3 plot_histograms.py results/st_bu_results.txt st_bu
 

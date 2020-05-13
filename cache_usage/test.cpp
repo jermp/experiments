@@ -53,6 +53,7 @@ private:
                    // that would be stored in set i
 };
 
+#include "include/node64.hpp"
 #include "include/segment_trees.hpp"
 #include "include/fenwick_trees.hpp"
 
@@ -121,6 +122,14 @@ int main(int argc, char const** argv) {
     {
         std::cout << "=== segment_tree_bottomup\n";
         segment_tree_bottomup tree;
+        TEST
+    }
+
+    L1.clear();
+
+    {
+        std::cout << "=== fenwick_tree_blocked<node64>\n";
+        fenwick_tree_blocked<node64> tree;
         TEST
     }
 
