@@ -41,7 +41,7 @@ thus we can manage strings of size at most 8 with a 64-bit unsigned integer.
 I've got a 2.4X time improvement on a recent processor
 and a large dataset of strings (AOL):
 
-	giulio@and:~/experiments/build$ ./integer_search_for_strings ~/aol.sorted 
+	giulio@and:~/experiments/build$ ./integer_search_for_strings ~/aol.sorted
 	read 1000000 strings
 	read 2000000 strings
 	read 3000000 strings
@@ -57,7 +57,7 @@ and a large dataset of strings (AOL):
 	total_length 222967274
 	avg_string_length 21.98
 	elapsed 901563
-	##ignore 107790308
+	##ignore 5065883426351
 	integer vector IS SORTED
 	elapsed 372834
-	##ignore 16296122582491315816
+	##ignore 5065883426351
