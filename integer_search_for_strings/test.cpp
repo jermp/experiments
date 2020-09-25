@@ -105,7 +105,7 @@ int main(int argc, char const** argv) {
         auto start = std::chrono::high_resolution_clock::now();
         for (auto q : queries) {
             auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
-            sum += (*it)[0];
+            sum += std::distance(strings.begin(), it);
         }
         auto stop = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
@@ -132,7 +132,7 @@ int main(int argc, char const** argv) {
         for (auto q : queries) {
             uint64_t x = string8_to_uint64(strings[q]);
             auto it = std::lower_bound(uint64_vec.begin(), uint64_vec.end(), x);
-            sum += *it;
+            sum += std::distance(uint64_vec.begin(), it);
         }
         auto stop = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
