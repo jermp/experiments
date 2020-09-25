@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <chrono>
+#include <iomanip>
 
 // g++ -std=c++17 -O3 -march=native integer_search_for_strings.cpp -o
 // integer_search_for_strings
@@ -46,17 +47,14 @@ std::vector<std::string> read_string_collection(char const* filename) {
     std::cout << "max_string_length " << max_string_length << std::endl;
     std::cout << "total_length " << sum_of_lengths << std::endl;
     std::cout << "avg_string_length " << std::fixed << std::setprecision(2)
-              << static_cast<double>(sum_of_lengths) / strings.size()
-              << std::endl;
+              << static_cast<double>(sum_of_lengths) / strings.size() << std::endl;
     return strings;
 }
 
 uint64_t string_to_uint64(std::string const& s) {
     std::string tmp(s.substr(0, prefix_size));
     if (s.size() < prefix_size) {
-        for (uint64_t i = 0; i != prefix_size - s.size(); ++i) {
-            tmp.push_back(0);
-        }
+        for (uint64_t i = 0; i != prefix_size - s.size(); ++i) { tmp.push_back(0); }
     }
     std::reverse(tmp.begin(), tmp.end());
     return *reinterpret_cast<uint64_t const*>(tmp.data());
@@ -80,9 +78,7 @@ int main(int argc, char const** argv) {
     uint64_t num_queries = std::min<uint64_t>(1000000, n);
     splitmix64 random(13);
     std::vector<uint64_t> queries(num_queries);
-    for (uint64_t i = 0; i != num_queries; ++i) {
-        queries[i] = random.next() % n;
-    }
+    for (uint64_t i = 0; i != num_queries; ++i) { queries[i] = random.next() % n; }
 
     for (auto& s : strings) s.resize(prefix_size);
 
@@ -91,8 +87,7 @@ int main(int argc, char const** argv) {
         uint64_t sum = 0;
         auto start = std::chrono::high_resolution_clock::now();
         for (auto q : queries) {
-            auto it =
-                std::lower_bound(strings.begin(), strings.end(), strings[q]);
+            auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
             sum += (*it)[0];
         }
         auto stop = std::chrono::high_resolution_clock::now();
