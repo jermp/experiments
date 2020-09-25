@@ -12,7 +12,7 @@ as follows:
 
 ```C++
 uint64_t string_to_uint64(std::string const& str) {
-	std::string tmp = str;
+    std::string tmp = str;
     std::reverse(tmp.begin(), tmp.end());
     return *reinterpret_cast<uint64_t const*>(tmp.data());
 }
