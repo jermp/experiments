@@ -28,3 +28,27 @@ binary searching a set of strings.
 
 If the base of representation is ASCII, than one symbol is coded in 1 byte,
 thus we can manage strings of size at most 8 with a 64-bit unsigned integer.
+
+I've got a 2X time improvement on a recent processor
+and a large dataset of strings (AOL):
+
+	giulio@and:~/experiments/build$ ./integer_search_for_strings ~/aol.sorted 
+	read 1000000 strings
+	read 2000000 strings
+	read 3000000 strings
+	read 4000000 strings
+	read 5000000 strings
+	read 6000000 strings
+	read 7000000 strings
+	read 8000000 strings
+	read 9000000 strings
+	read 10000000 strings
+	num_strings 10142395
+	max_string_length 126
+	total_length 222967274
+	avg_string_length 21.98
+	elapsed 901074
+	##ignore 107790308
+	integer vector IS SORTED
+	elapsed 422871
+	##ignore 16296122582491315816
