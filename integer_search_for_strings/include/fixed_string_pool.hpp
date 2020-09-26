@@ -70,18 +70,18 @@ struct fixed_string_pool {
             i += step;
             int cmp = byte_range_compare(access(i), target);
 
-            // branch-free version
-            bool flag = cmp < 0;
-            i += flag;
-            ret = flag * i + !flag * ret;
-            count = flag * (count - (step + 1)) + !flag * step;
+            // branch-free version seems to go slower here...
+            // bool flag = cmp < 0;
+            // i += flag;
+            // ret = flag * i + !flag * ret;
+            // count = flag * (count - (step + 1)) + !flag * step;
 
-            // if (cmp < 0) {
-            //     ret = ++i;
-            //     count -= step + 1;
-            // } else {
-            //     count = step;
-            // }
+            if (cmp < 0) {
+                ret = ++i;
+                count -= step + 1;
+            } else {
+                count = step;
+            }
         }
         return ret;
     }
