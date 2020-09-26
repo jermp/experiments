@@ -61,16 +61,16 @@ struct fixed_string_pool {
     uint64_t lower_bound(std::string const& val) const {
         int64_t count = size();
         int64_t step = 0;
-        uint64_t it = 0;
+        uint64_t i = 0;
         uint64_t ret = 0;
         auto target = byte_range_from_string<string_size>(val);
         while (count > 0) {
-            it = ret;
+            i = ret;
             step = count / 2;
-            it += step;
-            int cmp = byte_range_compare(access(it), target);
+            i += step;
+            int cmp = byte_range_compare(access(i), target);
             if (cmp < 0) {
-                ret = ++it;
+                ret = ++i;
                 count -= step + 1;
             } else {
                 count = step;

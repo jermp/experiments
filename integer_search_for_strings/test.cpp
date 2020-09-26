@@ -98,20 +98,20 @@ int main(int argc, char const** argv) {
     std::vector<uint64_t> queries(num_queries);
     for (uint64_t i = 0; i != num_queries; ++i) queries[i] = random.next() % n;
 
-    // for (auto& s : strings) s.resize(prefix_size);
-    // {
-    //     // measure time for binary search on std::vector<std::string>
-    //     uint64_t sum = 0;
-    //     auto start = std::chrono::high_resolution_clock::now();
-    //     for (auto q : queries) {
-    //         auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
-    //         sum += std::distance(strings.begin(), it);
-    //     }
-    //     auto stop = std::chrono::high_resolution_clock::now();
-    //     auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
-    //     std::cout << "elapsed " << elapsed.count() << std::endl;
-    //     std::cout << "##ignore " << sum << std::endl;
-    // }
+    for (auto& s : strings) s.resize(prefix_size);
+    {
+        // measure time for binary search on std::vector<std::string>
+        uint64_t sum = 0;
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto q : queries) {
+            auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
+            sum += std::distance(strings.begin(), it);
+        }
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+        std::cout << "elapsed " << elapsed.count() << std::endl;
+        std::cout << "##ignore " << sum << std::endl;
+    }
 
     fixed_string_pool<prefix_size> pool(n);
     for (auto const& s : strings) pool.append(s);
