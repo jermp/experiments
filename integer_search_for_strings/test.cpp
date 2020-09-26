@@ -13,6 +13,8 @@
 // g++ -std=c++17 -O3 -march=native integer_search_for_strings.cpp -o
 // integer_search_for_strings
 
+#include "include/fixed_string_pool.hpp"
+
 static const uint64_t prefix_size = 8;
 typedef std::chrono::microseconds duration_type;
 
@@ -94,18 +96,30 @@ int main(int argc, char const** argv) {
     uint64_t num_queries = std::min<uint64_t>(1000000, n);
     splitmix64 random(13);
     std::vector<uint64_t> queries(num_queries);
-    for (uint64_t i = 0; i != num_queries; ++i) { queries[i] = random.next() % n; }
+    for (uint64_t i = 0; i != num_queries; ++i) queries[i] = random.next() % n;
 
     // for (auto& s : strings) s.resize(prefix_size);
+    // {
+    //     // measure time for binary search on std::vector<std::string>
+    //     uint64_t sum = 0;
+    //     auto start = std::chrono::high_resolution_clock::now();
+    //     for (auto q : queries) {
+    //         auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
+    //         sum += std::distance(strings.begin(), it);
+    //     }
+    //     auto stop = std::chrono::high_resolution_clock::now();
+    //     auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+    //     std::cout << "elapsed " << elapsed.count() << std::endl;
+    //     std::cout << "##ignore " << sum << std::endl;
+    // }
 
+    fixed_string_pool<prefix_size> pool(n);
+    for (auto const& s : strings) pool.append(s);
     {
-        // measure time for binary search on std::string
+        // measure time for binary search on contiguous fixed-size strings
         uint64_t sum = 0;
         auto start = std::chrono::high_resolution_clock::now();
-        for (auto q : queries) {
-            auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
-            sum += std::distance(strings.begin(), it);
-        }
+        for (auto q : queries) sum += pool.lower_bound(strings[q]);
         auto stop = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;
