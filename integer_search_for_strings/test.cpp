@@ -7,6 +7,7 @@
 #include <fstream>
 #include <chrono>
 #include <iomanip>
+#include <cassert>
 #include <immintrin.h>  // for __builtin_bswap64
 
 // g++ -std=c++17 -O3 -march=native integer_search_for_strings.cpp -o
@@ -56,7 +57,7 @@ std::vector<std::string> read_string_collection(char const* filename) {
 uint64_t string_to_uint64(std::string const& s) {
     std::string tmp(s.substr(0, prefix_size));
     if (s.size() < prefix_size) {
-        for (uint64_t i = 0; i != prefix_size - s.size(); ++i) { tmp.push_back(0); }
+        for (uint64_t i = 0; i != prefix_size - s.size(); ++i) tmp.push_back(0);
     }
     std::reverse(tmp.begin(), tmp.end());
     return *reinterpret_cast<uint64_t const*>(tmp.data());
@@ -64,17 +65,15 @@ uint64_t string_to_uint64(std::string const& s) {
 
 // version that assumes a prefix of size 8
 uint64_t string8_to_uint64(std::string const& s) {
-    if (s.size() >= 8) {
-        // option 1. builtin reverse of bytes
-        return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(s.data()));
+    // option 1. builtin reverse of bytes
+    return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(s.data()));
 
-        // option 2. manual reverse of bytes
-        // uint64_t x = (uint64_t(s[0]) << 56) + (uint64_t(s[1]) << 48) + (uint64_t(s[2]) << 40) +
-        //              (uint64_t(s[3]) << 32) + (uint64_t(s[4]) << 24) + (uint64_t(s[5]) << 16) +
-        //              (uint64_t(s[6]) << 8) + uint64_t(s[7]);
-        // return x;
-    }
-    return string_to_uint64(s);
+    // option 2. manual reverse of bytes
+    // assert(s.size() >= 8);
+    // uint64_t x = (uint64_t(s[0]) << 56) + (uint64_t(s[1]) << 48) + (uint64_t(s[2]) << 40) +
+    //              (uint64_t(s[3]) << 32) + (uint64_t(s[4]) << 24) + (uint64_t(s[5]) << 16) +
+    //              (uint64_t(s[6]) << 8) + uint64_t(s[7]);
+    // return x;
 }
 
 int main(int argc, char const** argv) {
@@ -97,7 +96,7 @@ int main(int argc, char const** argv) {
     std::vector<uint64_t> queries(num_queries);
     for (uint64_t i = 0; i != num_queries; ++i) { queries[i] = random.next() % n; }
 
-    for (auto& s : strings) s.resize(prefix_size);
+    // for (auto& s : strings) s.resize(prefix_size);
 
     {
         // measure time for binary search on std::string
