@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <cstring>
 
 struct byte_range {
     uint8_t const* begin;
