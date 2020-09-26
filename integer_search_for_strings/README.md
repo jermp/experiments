@@ -38,10 +38,12 @@ binary searching a set of strings.
 If the base of representation is ASCII, than one symbol is coded in 1 byte,
 thus we can manage strings of size at most 8 with a 64-bit unsigned integer.
 
-I've got a 2.4X time improvement on a recent processor
-and a large dataset of strings (AOL):
+On a recent processor and with a large dataset of strings (AOL),
+I've obtained:
+(1) 2.4X time improvement against `std::lower_bound` running over a `std::vector<std::string>`; (2) 1.7X time improvement using a custom string pool where strings are contiguous in memory and pointers overhead (in both space and time) is completely avoided.
 
-	giulio@and:~/experiments/build$ ./integer_search_for_strings ~/aol.sorted
+
+	giulio@and:~/experiments/build$ ./integer_search_for_strings ~/aol.sorted 
 	read 1000000 strings
 	read 2000000 strings
 	read 3000000 strings
@@ -56,8 +58,10 @@ and a large dataset of strings (AOL):
 	max_string_length 126
 	total_length 222967274
 	avg_string_length 21.98
-	elapsed 901563
+	elapsed 907553
+	##ignore 5065883426351
+	elapsed 637151
 	##ignore 5065883426351
 	integer vector IS SORTED
-	elapsed 372834
+	elapsed 376321
 	##ignore 5065883426351

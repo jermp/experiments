@@ -69,12 +69,19 @@ struct fixed_string_pool {
             step = count / 2;
             i += step;
             int cmp = byte_range_compare(access(i), target);
-            if (cmp < 0) {
-                ret = ++i;
-                count -= step + 1;
-            } else {
-                count = step;
-            }
+
+            // branch-free version
+            bool flag = cmp < 0;
+            i += flag;
+            ret = flag * i + !flag * ret;
+            count = flag * (count - (step + 1)) + !flag * step;
+
+            // if (cmp < 0) {
+            //     ret = ++i;
+            //     count -= step + 1;
+            // } else {
+            //     count = step;
+            // }
         }
         return ret;
     }
