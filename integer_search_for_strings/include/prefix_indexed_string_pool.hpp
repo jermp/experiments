@@ -44,10 +44,8 @@ struct prefix_indexed_string_pool {
                 }
             }
             m_pointers.push_back(n);
-            m_pointers.push_back(n + 1);
-            m_prefixes.push_back(x);
 
-            std::cout << "num. distinct prefixes: " << m_prefixes.size() << " ("
+            std::cout << "num. prefixes: " << m_prefixes.size() << " ("
                       << (m_prefixes.size() * 100.0) / n << "%)" << std::endl;
             assert(std::unique(m_prefixes.begin(), m_prefixes.end()) == m_prefixes.end());
             assert(std::is_sorted(m_prefixes.begin(), m_prefixes.end()));
@@ -99,11 +97,10 @@ struct prefix_indexed_string_pool {
         uint64_t x = string8_to_uint64(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
-        uint64_t begin = m_pointers[p];
+        uint64_t begin = m_pointers[p ? p - 1 : p];
         uint64_t end = m_pointers[p + 1];
         assert(end > begin);
         int64_t count = end - begin;
-        if (count == 1) return begin;
         int64_t step = 0;
         uint64_t i = begin;
         uint64_t ret = begin;
