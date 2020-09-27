@@ -109,7 +109,7 @@ struct prefix_indexed_string_pool {
             i = ret;
             step = count / 2;
             i += step;
-            int cmp = byte_range_compare(access(i), target);
+            int cmp = byte_range_compare_from8(access(i), target);
             if (cmp < 0) {
                 ret = ++i;
                 count -= step + 1;
