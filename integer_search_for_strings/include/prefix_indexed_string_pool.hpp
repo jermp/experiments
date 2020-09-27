@@ -37,7 +37,7 @@ struct prefix_indexed_string_pool {
                     continue;
                 }
 
-                static const uint64_t C = 256;
+                static const uint64_t C = 32;
                 if (m_prefixes.back() != x and i - m_pointers.back() > C) {
                     m_pointers.push_back(i);
                     m_prefixes.push_back(x);
