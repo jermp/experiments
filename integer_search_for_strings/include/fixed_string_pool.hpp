@@ -3,34 +3,8 @@
 #include <vector>
 #include <string>
 #include <cassert>
-#include <cstring>
 
-struct byte_range {
-    uint8_t const* begin;
-    uint8_t const* end;
-};
-
-inline int byte_range_compare(byte_range l, byte_range r) {
-    int size_l = l.end - l.begin;
-    int size_r = r.end - r.begin;
-    int n = size_l < size_r ? size_l : size_r;
-    int cmp =
-        strncmp(reinterpret_cast<const char*>(l.begin), reinterpret_cast<const char*>(r.begin), n);
-    if (cmp != 0) return cmp;
-    return size_l - size_r;
-}
-
-template <uint64_t string_size>
-byte_range byte_range_from_string(std::string const& str) {
-    const uint8_t* buf = reinterpret_cast<uint8_t const*>(str.c_str());
-    const uint8_t* end;
-    if (str.size() >= string_size) {
-        end = buf + string_size;
-    } else {
-        end = buf + str.size();  // exclude the null terminator
-    }
-    return {buf, end};
-}
+#include "util.hpp"
 
 template <uint64_t string_size>
 struct fixed_string_pool {
