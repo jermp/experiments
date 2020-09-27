@@ -98,7 +98,7 @@ struct prefix_indexed_string_pool {
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
         uint64_t begin = m_pointers[p ? p - 1 : p];
-        uint64_t end = m_pointers[p + 1];
+        uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
         assert(end > begin);
         int64_t count = end - begin;
         int64_t step = 0;
