@@ -33,19 +33,19 @@ int main(int argc, char const** argv) {
 
     // for (auto& s : strings) s.resize(prefix_size);
 
-    {
-        // measure time for binary search on std::vector<std::string>
-        uint64_t sum = 0;
-        auto start = std::chrono::high_resolution_clock::now();
-        for (auto q : queries) {
-            auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
-            sum += std::distance(strings.begin(), it);
-        }
-        auto stop = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
-        std::cout << "elapsed " << elapsed.count() << std::endl;
-        std::cout << "##ignore " << sum << std::endl;
-    }
+    // {
+    //     // measure time for binary search on std::vector<std::string>
+    //     uint64_t sum = 0;
+    //     auto start = std::chrono::high_resolution_clock::now();
+    //     for (auto q : queries) {
+    //         auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
+    //         sum += std::distance(strings.begin(), it);
+    //     }
+    //     auto stop = std::chrono::high_resolution_clock::now();
+    //     auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+    //     std::cout << "elapsed " << elapsed.count() << std::endl;
+    //     std::cout << "##ignore " << sum << std::endl;
+    // }
 
     {
         // measure time for binary search on contiguous strings

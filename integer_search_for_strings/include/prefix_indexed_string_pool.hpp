@@ -35,7 +35,9 @@ struct prefix_indexed_string_pool {
                     m_prefixes.push_back(x);
                     continue;
                 }
-                if (m_prefixes.back() != x) {
+
+                static const uint64_t C = 256;
+                if (m_prefixes.back() != x and i - m_pointers.back() > C) {
                     m_pointers.push_back(i);
                     m_prefixes.push_back(x);
                 }
@@ -98,7 +100,7 @@ struct prefix_indexed_string_pool {
         uint64_t end = m_pointers[p + 1];
         assert(end > begin);
         int64_t count = end - begin;
-        if (count == 1) return begin;
+        // if (count == 1) return begin;
         int64_t step = 0;
         uint64_t i = begin;
         uint64_t ret = begin;
