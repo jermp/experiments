@@ -20,6 +20,7 @@ struct prefix_indexed_string_pool {
 
         template <typename Iterator>
         void build(Iterator begin, uint64_t n) {
+            uint64_t x = 0;
             for (uint64_t i = 0; i != n; ++i, ++begin) {
                 auto str = *begin;
                 append(byte_range_from_string(str));
@@ -29,7 +30,7 @@ struct prefix_indexed_string_pool {
                 }
 
                 // keep only distinct integer prefixes
-                uint64_t x = string8_to_uint64(str);
+                x = string8_to_uint64(str);
                 if (m_prefixes.empty()) {
                     m_pointers.push_back(0);
                     m_prefixes.push_back(x);
@@ -43,6 +44,8 @@ struct prefix_indexed_string_pool {
                 }
             }
             m_pointers.push_back(n);
+            m_pointers.push_back(n + 1);
+            m_prefixes.push_back(x);
 
             std::cout << "num. distinct prefixes: " << m_prefixes.size() << " ("
                       << (m_prefixes.size() * 100.0) / n << "%)" << std::endl;
@@ -100,7 +103,7 @@ struct prefix_indexed_string_pool {
         uint64_t end = m_pointers[p + 1];
         assert(end > begin);
         int64_t count = end - begin;
-        // if (count == 1) return begin;
+        if (count == 1) return begin;
         int64_t step = 0;
         uint64_t i = begin;
         uint64_t ret = begin;
