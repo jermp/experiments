@@ -78,14 +78,22 @@ int main(int argc, char const** argv) {
         // measure time for binary search on uint64_t
         std::vector<uint64_t> uint64_vec;
         uint64_vec.reserve(strings.size());
+
+        // all prefixes, possibly repeated
         for (auto const& s : strings) {
             uint64_t x = string8_to_uint64(s);
             uint64_vec.push_back(x);
             // std::cout << x << std::endl;
             // std::cout << std::bitset<64>(x) << std::endl;
         }
-        // bool is_sorted = std::is_sorted(uint64_vec.begin(), uint64_vec.end());
-        // if (is_sorted) std::cout << "integer vector IS SORTED" << std::endl;
+
+        // keep only distinct prefixes
+        auto it = std::unique(uint64_vec.begin(), uint64_vec.end());
+        uint64_vec.resize(std::distance(uint64_vec.begin(), it));
+        std::cout << "num. distinct prefixes: " << uint64_vec.size() << " ("
+                  << (uint64_vec.size() * 100.0) / strings.size() << "%)" << std::endl;
+        bool is_sorted = std::is_sorted(uint64_vec.begin(), uint64_vec.end());
+        if (is_sorted) std::cout << "integer vector IS SORTED" << std::endl;
 
         uint64_t sum = 0;
         auto start = std::chrono::high_resolution_clock::now();
