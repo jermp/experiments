@@ -6,6 +6,8 @@
 
 #include "util.hpp"
 
+/* A pool of strings where each string has a fixed size, specified by a template. */
+
 template <uint64_t string_size>
 struct fixed_string_pool {
     fixed_string_pool(uint64_t num_strings) {

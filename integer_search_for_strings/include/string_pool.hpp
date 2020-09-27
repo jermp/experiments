@@ -6,6 +6,10 @@
 
 #include "util.hpp"
 
+/* A pool of strings. Differently from a std::vector<std::string>, this class
+uses a contiguous chunk of memory and uses integer pointers to keep track of
+where each individual string begins (and ends). It also avoids the null terminator '\0'. */
+
 struct string_pool {
     typedef uint32_t pointer_type;
 
@@ -19,7 +23,7 @@ struct string_pool {
         void build(Iterator begin, uint64_t n) {
             for (uint64_t i = 0; i != n; ++i, ++begin) {
                 append(byte_range_from_string(*begin));
-                if (num_bytes() > (uint64_t(1) << (sizeof(pointer_type) * 8))) {
+                if (m_strings.size() > (uint64_t(1) << (sizeof(pointer_type) * 8))) {
                     throw std::runtime_error(std::to_string(sizeof(pointer_type) * 8) +
                                              " bits per pointers are not enough");
                 }
@@ -35,10 +39,6 @@ struct string_pool {
             pool.m_endpoints.swap(m_endpoints);
             pool.m_strings.swap(m_strings);
             swap(*this);
-        }
-
-        uint64_t num_bytes() const {
-            return m_strings.size();
         }
 
         void swap(builder& other) {
