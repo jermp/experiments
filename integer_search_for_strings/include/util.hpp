@@ -27,15 +27,15 @@ inline int byte_range_compare(byte_range l, byte_range r) {
     return size_l - size_r;
 }
 
-inline int byte_range_compare_from8(byte_range l, byte_range r) {
-    int size_l = l.end - l.begin;
-    int size_r = r.end - r.begin;
-    int n = size_l < size_r ? size_l : size_r;
-    int cmp = strncmp(reinterpret_cast<const char*>(l.begin) + 8,
-                      reinterpret_cast<const char*>(r.begin) + 8, n - 8);
-    if (cmp != 0) return cmp;
-    return size_l - size_r;
-}
+// inline int byte_range_compare_from8(byte_range l, byte_range r) {
+//     int size_l = l.end - l.begin;
+//     int size_r = r.end - r.begin;
+//     int n = size_l < size_r ? size_l : size_r;
+//     int cmp = strncmp(reinterpret_cast<const char*>(l.begin) + 8,
+//                       reinterpret_cast<const char*>(r.begin) + 8, n - 8);
+//     if (cmp != 0) return cmp;
+//     return size_l - size_r;
+// }
 
 byte_range byte_range_from_string(std::string const& str) {
     const uint8_t* buf = reinterpret_cast<uint8_t const*>(str.c_str());
@@ -114,4 +114,25 @@ uint64_t string8_to_uint64(std::string const& s) {
     //              (uint64_t(s[3]) << 32) + (uint64_t(s[4]) << 24) + (uint64_t(s[5]) << 16) +
     //              (uint64_t(s[6]) << 8) + uint64_t(s[7]);
     // return x;
+}
+
+uint64_t byte_range_to_uint64(byte_range br) {
+    // uint64_t size = br.end - br.begin;
+    // if (size < 8) {
+    //     uint64_t mask = (1ULL << (size * 8)) - 1;
+    //     uint64_t x = (*reinterpret_cast<uint64_t const*>(br.begin)) & mask;
+    //     return __builtin_bswap64(x);
+    // }
+    return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(br.begin));
+}
+
+inline int byte_range_compare_from8(byte_range l, byte_range r) {
+    int size_l = l.end - l.begin;
+    int size_r = r.end - r.begin;
+    if (size_l >= 8 and size_r >= 8) {
+        uint64_t x = byte_range_to_uint64(l);
+        uint64_t y = byte_range_to_uint64(r);
+        if (x != y) return x < y ? -1 : 1;
+    }
+    return byte_range_compare(l, r);
 }
