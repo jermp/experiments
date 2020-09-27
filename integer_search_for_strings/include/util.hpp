@@ -123,21 +123,21 @@ uint64_t byte_range_to_uint64(byte_range br) {
     // return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(br.begin));
 }
 
-inline int byte_range_compare_from8(byte_range l, byte_range r) {
+inline bool byte_range_compare_from8(byte_range l, byte_range r) {
     // int size_l = l.end - l.begin;
     // int size_r = r.end - r.begin;
 
     uint64_t x = byte_range_to_uint64(l);
     uint64_t y = byte_range_to_uint64(r);
-    if (x != y) return x < y ? -1 : 1;
+    if (x != y) return x < y;
 
     x = byte_range_to_uint64({l.begin + 8, l.end});
     y = byte_range_to_uint64({r.begin + 8, r.end});
-    if (x != y) return x < y ? -1 : 1;
+    if (x != y) return x < y;
 
     // x = byte_range_to_uint64({l.begin + 16, l.end});
     // y = byte_range_to_uint64({r.begin + 16, r.end});
     // if (x != y) return x < y ? -1 : 1;
 
-    return byte_range_compare(l, r);
+    return byte_range_compare(l, r) < 0;
 }
