@@ -122,7 +122,11 @@ struct prefix_indexed_string_pool {
             i = ret;
             step = count / 2;
             i += step;
+
+            /* this is faster than traditional string compare as below */
             bool less = byte_range_compare_v2(access(i), target);
+            // bool less = byte_range_compare(access(i), target) < 0;
+
             if (less) {
                 ret = ++i;
                 count -= step + 1;
