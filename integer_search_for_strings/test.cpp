@@ -88,6 +88,14 @@ int main(int argc, char const** argv) {
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;
         std::cout << "##ignore " << sum << std::endl;
+
+        sum = 0;
+        start = std::chrono::high_resolution_clock::now();
+        for (auto q : queries) sum += pool.lower_bound(strings, strings[q]);
+        stop = std::chrono::high_resolution_clock::now();
+        elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+        std::cout << "elapsed " << elapsed.count() << std::endl;
+        std::cout << "##ignore " << sum << std::endl;
     }
 
     return 0;

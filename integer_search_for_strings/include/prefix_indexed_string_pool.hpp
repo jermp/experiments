@@ -157,6 +157,31 @@ struct prefix_indexed_string_pool {
         // return ret;
     }
 
+    uint64_t lower_bound(std::vector<std::string> const& strings, std::string const& val) const {
+        uint64_t x = string8_to_uint64(val);
+        auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
+        uint64_t p = std::distance(m_prefixes.begin(), it);
+        uint64_t begin = m_pointers[p ? p - 1 : p];
+        uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
+        assert(end > begin);
+        int64_t count = end - begin;
+        int64_t step = 0;
+        uint64_t i = begin;
+        uint64_t ret = begin;
+        while (count > 0) {
+            i = ret;
+            step = count / 2;
+            i += step;
+            if (strings[i] < val) {
+                ret = ++i;
+                count -= step + 1;
+            } else {
+                count = step;
+            }
+        }
+        return ret;
+    }
+
 private:
     std::vector<uint64_t> m_prefixes;
     std::vector<pointer_type> m_pointers;
