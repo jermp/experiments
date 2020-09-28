@@ -123,7 +123,7 @@ uint64_t byte_range_to_uint64(byte_range br) {
     // return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(br.begin));
 }
 
-inline bool byte_range_compare_from8(byte_range l, byte_range r) {
+inline bool byte_range_compare_v2(byte_range l, byte_range r) {
     // int size_l = l.end - l.begin;
     // int size_r = r.end - r.begin;
 

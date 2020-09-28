@@ -85,7 +85,7 @@ struct prefix_indexed_string_pool {
         return m_strings_offsets.size() - 1;
     }
 
-    byte_range access(uint64_t i) const {
+    inline byte_range access(uint64_t i) const {
         assert(i < size());
         auto begin = m_strings_offsets[i];
         auto end = m_strings_offsets[i + 1];
@@ -101,6 +101,19 @@ struct prefix_indexed_string_pool {
         uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
         assert(end > begin);
         int64_t count = end - begin;
+
+        // option 1. small ranges are done via linear search
+        // if (count < 128) {
+        //     auto target = byte_range_from_string(val);
+        //     for (; begin != end; ++begin) {
+        //         bool less = byte_range_compare_v2(access(begin), target);
+        //         if (!less) return begin;
+        //     }
+        //     return end;
+        // }
+
+        // option 2. always do binary search
+        // this seems to be the fastest option...
         int64_t step = 0;
         uint64_t i = begin;
         uint64_t ret = begin;
@@ -109,7 +122,7 @@ struct prefix_indexed_string_pool {
             i = ret;
             step = count / 2;
             i += step;
-            bool less = byte_range_compare_from8(access(i), target);
+            bool less = byte_range_compare_v2(access(i), target);
             if (less) {
                 ret = ++i;
                 count -= step + 1;
@@ -118,6 +131,26 @@ struct prefix_indexed_string_pool {
             }
         }
         return ret;
+
+        // option 3. cutoff to linear search
+        // int64_t step = 0;
+        // uint64_t i = begin;
+        // uint64_t ret = begin;
+        // auto target = byte_range_from_string(val);
+        // while (count > 128) {
+        //     i = ret;
+        //     step = count / 2;
+        //     i += step;
+        //     bool less = byte_range_compare_v2(access(i), target);
+        //     if (less) {
+        //         ret = ++i;
+        //         count -= step + 1;
+        //     } else {
+        //         count = step;
+        //     }
+        // }
+        // while (byte_range_compare_v2(access(ret), target)) ++ret;
+        // return ret;
     }
 
 private:
