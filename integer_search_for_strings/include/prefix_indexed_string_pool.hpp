@@ -101,6 +101,7 @@ struct prefix_indexed_string_pool {
         uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
         assert(end > begin);
         int64_t count = end - begin;
+        return count;
 
         // option 1. small ranges are done via linear search
         // if (count < 128) {
@@ -165,6 +166,8 @@ struct prefix_indexed_string_pool {
         uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
         assert(end > begin);
         int64_t count = end - begin;
+        return count;
+
         int64_t step = 0;
         uint64_t i = begin;
         uint64_t ret = begin;

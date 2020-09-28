@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <cassert>
 #include <immintrin.h>  // for __builtin_bswap64
+#include <cstring>
 
 struct byte_range {
     uint8_t const* begin;
