@@ -114,7 +114,7 @@ inline bool cmplt_u128(__m128i a, __m128i b) {
     // Flip the sign bits in both arguments.
     // Transforms 0 into -128 = minimum for signed bytes,
     // 0xFF into +127 = maximum for signed bytes
-    const __m128i signBits = _mm_set1_epi8((char)0x80);
+    static const __m128i signBits = _mm_set1_epi8((char)0x80);
     a = _mm_xor_si128(a, signBits);
     b = _mm_xor_si128(b, signBits);
 
