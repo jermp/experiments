@@ -106,6 +106,24 @@ uint64_t string_to_uint64(std::string const& s) {
     // return x;
 }
 
+#include "immintrin.h"
+
+// True if a < b, for unsigned 128 bit integers
+// taken from: https://stackoverflow.com/questions/56341434/compare-two-m128i-values-for-total-order
+inline bool cmplt_u128(__m128i a, __m128i b) {
+    // Flip the sign bits in both arguments.
+    // Transforms 0 into -128 = minimum for signed bytes,
+    // 0xFF into +127 = maximum for signed bytes
+    const __m128i signBits = _mm_set1_epi8((char)0x80);
+    a = _mm_xor_si128(a, signBits);
+    b = _mm_xor_si128(b, signBits);
+
+    // Now the signed byte comparisons will give the correct order
+    const int less = _mm_movemask_epi8(_mm_cmplt_epi8(a, b));
+    const int greater = _mm_movemask_epi8(_mm_cmpgt_epi8(a, b));
+    return less > greater;
+}
+
 struct uint128_t {
     uint64_t x1;
     uint64_t x2;
@@ -114,14 +132,17 @@ struct uint128_t {
         return x1 != rhs.x1 and x2 != rhs.x2;
     }
     bool operator<(uint128_t rhs) const {
-        if (x1 != rhs.x1) return x1 < rhs.x1;
-        return x2 < rhs.x2;
+        __m128i x = _mm_load_si128((__m128i const*)&rhs);  //_mm_load_si128
+        return cmplt_u128(*(__m128i const*)this, x);
+        // if (x1 != rhs.x1) return x1 < rhs.x1;
+        // return x2 < rhs.x2;
     }
 };
 
 uint128_t string_to_uint128(std::string const& s) {
     uint64_t const* x = reinterpret_cast<uint64_t const*>(s.data());
-    return {__builtin_bswap64(x[0]), __builtin_bswap64(x[1])};
+    return {__builtin_bswap64(x[1]), __builtin_bswap64(x[0])};  // for SIMD comparisons
+    // return {__builtin_bswap64(x[0]), __builtin_bswap64(x[1])}; // for scalar comparisons
 }
 
 uint64_t byte_range_to_uint64(byte_range br) {
