@@ -94,7 +94,7 @@ std::vector<std::string> read_string_collection(char const* filename) {
 // }
 
 // version that assumes a prefix of size 8
-uint64_t string8_to_uint64(std::string const& s) {
+uint64_t string_to_uint64(std::string const& s) {
     // option 1. builtin reverse of bytes
     return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(s.data()));
 
@@ -114,20 +114,23 @@ uint64_t byte_range_to_uint64(byte_range br) {
 }
 
 inline bool byte_range_compare_v2(byte_range l, byte_range r) {
-    // int size_l = l.end - l.begin;
-    // int size_r = r.end - r.begin;
-
-    uint64_t x = byte_range_to_uint64(l);
-    uint64_t y = byte_range_to_uint64(r);
-    if (x != y) return x < y;
-
-    x = byte_range_to_uint64({l.begin + 8, l.end});
-    y = byte_range_to_uint64({r.begin + 8, r.end});
-    if (x != y) return x < y;
-
-    // x = byte_range_to_uint64({l.begin + 16, l.end});
-    // y = byte_range_to_uint64({r.begin + 16, r.end});
-    // if (x != y) return x < y ? -1 : 1;
-
+    uint64_t x1 = byte_range_to_uint64(l);
+    uint64_t y1 = byte_range_to_uint64(r);
+    if (x1 != y1) return x1 < y1;
+    uint64_t x2 = byte_range_to_uint64({l.begin + 8, l.end});
+    uint64_t y2 = byte_range_to_uint64({r.begin + 8, r.end});
+    if (x2 != y2) return x2 < y2;
     return byte_range_compare(l, r) < 0;
+}
+
+inline bool string_compare_v2(std::string const& l, std::string const& r) {
+    uint64_t x1 = string_to_uint64(l);
+    uint64_t y1 = string_to_uint64(r);
+    if (x1 != y1) return x1 < y1;
+    // if (l.size() > 8 and r.size() < 8) {
+    //     uint64_t x2 = string_to_uint64(l.substr(8, l.size() - 8));
+    //     uint64_t y2 = string_to_uint64(r.substr(8, r.size() - 8));
+    //     if (x2 != y2) return x2 < y2;
+    // }
+    return l < r;
 }

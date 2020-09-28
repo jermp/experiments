@@ -30,7 +30,7 @@ struct prefix_indexed_string_pool {
                 }
 
                 // keep only distinct integer prefixes
-                x = string8_to_uint64(str);
+                x = string_to_uint64(str);
                 if (m_prefixes.empty()) {
                     m_pointers.push_back(0);
                     m_prefixes.push_back(x);
@@ -94,14 +94,14 @@ struct prefix_indexed_string_pool {
     }
 
     uint64_t lower_bound(std::string const& val) const {
-        uint64_t x = string8_to_uint64(val);
+        uint64_t x = string_to_uint64(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
         uint64_t begin = m_pointers[p ? p - 1 : p];
         uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
         assert(end > begin);
         int64_t count = end - begin;
-        return count;
+        // return count;
 
         // option 1. small ranges are done via linear search
         // if (count < 128) {
@@ -158,15 +158,26 @@ struct prefix_indexed_string_pool {
         // return ret;
     }
 
-    uint64_t lower_bound(std::vector<std::string> const& strings, std::string const& val) const {
-        uint64_t x = string8_to_uint64(val);
+    uint64_t lower_bound(
+        std::vector<std::string> const&
+            strings,  // WARNING: this should be the same collection that was used to build the
+                      // prefixes. It is passed here as input parameter just for testing.
+        std::string const& val) const {
+        uint64_t x = string_to_uint64(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
         uint64_t begin = m_pointers[p ? p - 1 : p];
         uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
         assert(end > begin);
         int64_t count = end - begin;
-        return count;
+        // return count;
+
+        // if (count < 128) {
+        //     for (uint64_t i = begin; i != end; ++i) {
+        //         if (strings[i] >= val) return i;
+        //     }
+        //     return end;
+        // }
 
         int64_t step = 0;
         uint64_t i = begin;
@@ -175,7 +186,9 @@ struct prefix_indexed_string_pool {
             i = ret;
             step = count / 2;
             i += step;
-            if (strings[i] < val) {
+            // bool less = strings[i] < val;
+            bool less = string_compare_v2(strings[i], val);
+            if (less) {
                 ret = ++i;
                 count -= step + 1;
             } else {
