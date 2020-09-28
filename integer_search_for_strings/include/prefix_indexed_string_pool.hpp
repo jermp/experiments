@@ -93,6 +93,11 @@ struct prefix_indexed_string_pool {
     }
 
     uint64_t lower_bound(std::string const& val) const {
+        // This first search is 5X faster than the overall process,
+        // so we should not spend time in making it faster.
+        // We should, instead, devise a faster solution to search
+        // through a (medium-short) range of strings that share a common prefix,
+        // which is the step performed after this search.
         uint64_t x = string_to_uint64(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
