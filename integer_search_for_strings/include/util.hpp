@@ -106,6 +106,24 @@ uint64_t string_to_uint64(std::string const& s) {
     // return x;
 }
 
+struct uint128_t {
+    uint64_t x1;
+    uint64_t x2;
+
+    bool operator!=(uint128_t rhs) const {
+        return x1 != rhs.x1 and x2 != rhs.x2;
+    }
+    bool operator<(uint128_t rhs) const {
+        if (x1 != rhs.x1) return x1 < rhs.x1;
+        return x2 < rhs.x2;
+    }
+};
+
+uint128_t string_to_uint128(std::string const& s) {
+    uint64_t const* x = reinterpret_cast<uint64_t const*>(s.data());
+    return {__builtin_bswap64(x[0]), __builtin_bswap64(x[1])};
+}
+
 uint64_t byte_range_to_uint64(byte_range br) {
     uint64_t size = br.end - br.begin;
     uint64_t mask = size < 8 ? (1ULL << (size * 8)) - 1 : -1;

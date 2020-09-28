@@ -7,6 +7,7 @@
 #include "include/string_pool.hpp"
 #include "include/fixed_string_pool.hpp"
 #include "include/prefix_indexed_string_pool.hpp"
+#include "include/prefix_indexed_string_pool_v2.hpp"
 
 static const uint64_t prefix_size = 8;
 typedef std::chrono::microseconds duration_type;
@@ -94,6 +95,22 @@ int main(int argc, char const** argv) {
         for (auto q : queries) sum += pool.lower_bound(strings, strings[q]);
         stop = std::chrono::high_resolution_clock::now();
         elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+        std::cout << "elapsed " << elapsed.count() << std::endl;
+        std::cout << "##ignore " << sum << std::endl;
+    }
+
+    {
+        // measure time for binary search on prefix_indexed_string_pool_v2 (prefixes of 16 bytes,
+        // instead of 8)
+        prefix_indexed_string_pool_v2::builder builder(n);
+        prefix_indexed_string_pool_v2 pool;
+        builder.build(strings.begin(), strings.size());
+        builder.build(pool);
+        uint64_t sum = 0;
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto q : queries) sum += pool.lower_bound(strings[q]);
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;
         std::cout << "##ignore " << sum << std::endl;
     }
