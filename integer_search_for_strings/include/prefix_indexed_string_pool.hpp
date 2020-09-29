@@ -96,7 +96,7 @@ struct prefix_indexed_string_pool {
         // This first search is 5X faster than the overall process,
         // so we should not spend time in making it faster.
         // We should, instead, devise a faster solution to search
-        // through a (medium-short) range of strings that share a common prefix,
+        // through a (medium-short) range of strings,
         // which is the step performed after this search.
         uint64_t x = string_to_uint64(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
@@ -105,16 +105,20 @@ struct prefix_indexed_string_pool {
         uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
         assert(end > begin);
         int64_t count = end - begin;
-        // return count;
+
+        // if (count <= 256)
+        //     return count;  // with this, we improve by 3X, thus indicating that we should
+        //     optimize
+        //                    // for small ranges. build a small trie on the range?
+
+        /* Maybe we could re-use the same technique inside the range, essentially
+        making a two/three-level data structure.*/
 
         // option 1. small ranges are done via linear search
-        // if (count < 128) {
+        // if (count < 256) {
         //     auto target = byte_range_from_string(val);
-        //     for (; begin != end; ++begin) {
-        //         bool less = byte_range_compare_v2(access(begin), target);
-        //         if (!less) return begin;
-        //     }
-        //     return end;
+        //     while (byte_range_compare_v2(access(begin), target)) ++begin;
+        //     return begin;
         // }
 
         // option 2. always do binary search
