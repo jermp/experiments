@@ -22,23 +22,13 @@ struct prefix_indexed_front_coded_dictionary {
             std::cout << "n " << n << std::endl;
             std::cout << "buckets " << buckets << std::endl;
 
-            m_headers_offsets.reserve(buckets + 1);
             m_buckets_offsets.reserve(buckets + 1);
-            m_headers_offsets.push_back(0);
             m_buckets_offsets.push_back(0);
 
             std::string prev, curr, header;
             for (uint64_t b = 0; b != buckets; ++b) {
                 header = *begin++;
                 headers.push_back(header);
-                m_headers.insert(m_headers.end(), header.begin(), header.end());
-                static const uint64_t max_addressable_size = uint64_t(1) << 32;
-                if (m_headers.size() >= max_addressable_size) {
-                    throw std::runtime_error(
-                        "Error: offsets to headers must be made 64-bit "
-                        "integers");
-                }
-                m_headers_offsets.push_back(m_headers.size());
                 prev.swap(header);
                 uint64_t size = b != buckets - 1 ? BucketSize : tail;
                 for (uint64_t i = 0; i != size; ++i) {
@@ -53,6 +43,7 @@ struct prefix_indexed_front_coded_dictionary {
                     m_data.insert(m_data.end(), curr.begin() + l, curr.end());
                     prev.swap(curr);
                 }
+                static const uint64_t max_addressable_size = uint64_t(1) << 32;
                 if (m_data.size() >= max_addressable_size) {
                     throw std::runtime_error(
                         "Error: offsets to buckets must be made 64-bit "
@@ -63,7 +54,6 @@ struct prefix_indexed_front_coded_dictionary {
 
             // NOTE: pad to allow fixed-copy operations
             for (uint64_t i = 0; i != constants::max_string_length - 1; ++i) {
-                m_headers.push_back(0);
                 m_data.push_back(0);
             }
 
@@ -75,9 +65,7 @@ struct prefix_indexed_front_coded_dictionary {
         void swap(builder& other) {
             std::swap(other.m_size, m_size);
             other.headers.swap(headers);
-            other.m_headers_offsets.swap(m_headers_offsets);
             other.m_buckets_offsets.swap(m_buckets_offsets);
-            other.m_headers.swap(m_headers);
             other.m_data.swap(m_data);
         }
 
@@ -88,9 +76,7 @@ struct prefix_indexed_front_coded_dictionary {
             prefixes_builder.build(headers.begin(), headers.size());
             prefixes_builder.build(dict.m_pool);
 
-            dict.m_headers_offsets.swap(m_headers_offsets);
             dict.m_buckets_offsets.swap(m_buckets_offsets);
-            dict.m_headers.swap(m_headers);
             dict.m_data.swap(m_data);
             builder().swap(*this);
         }
@@ -98,9 +84,7 @@ struct prefix_indexed_front_coded_dictionary {
     private:
         uint64_t m_size;
         std::vector<std::string> headers;
-        std::vector<uint32_t> m_headers_offsets;
         std::vector<uint32_t> m_buckets_offsets;
-        std::vector<uint8_t> m_headers;
         std::vector<uint8_t> m_data;
     };
 
@@ -108,9 +92,7 @@ struct prefix_indexed_front_coded_dictionary {
     void visit(Visitor& visitor) {
         visitor.visit(m_size);
         visitor.visit(m_pool);
-        visitor.visit(m_headers_offsets);
         visitor.visit(m_buckets_offsets);
-        visitor.visit(m_headers);
         visitor.visit(m_data);
     }
 
@@ -153,19 +135,12 @@ struct prefix_indexed_front_coded_dictionary {
 
 private:
     uint64_t m_size;
-
     prefix_indexed_string_pool m_pool;
-
-    // NOTE: these two can be stored interleaved
-    std::vector<uint32_t> m_headers_offsets;
     std::vector<uint32_t> m_buckets_offsets;
-
-    std::vector<uint8_t> m_headers;
     std::vector<uint8_t> m_data;
 
     uint64_t buckets() const {
-        assert(m_headers_offsets.size() > 0);
-        return m_headers_offsets.size() - 1;
+        return m_pool.size();
     }
 
     uint64_t bucket_size(uint64_t bucket) const {
@@ -175,16 +150,9 @@ private:
         return tail;
     }
 
-    byte_range access_header(uint64_t id) const {
-        assert(id < buckets());
-        uint64_t begin = m_headers_offsets[id];
-        uint64_t end = m_headers_offsets[id + 1];
-        return {m_headers.data() + begin, m_headers.data() + end};
-    }
-
     std::tuple<byte_range, bool, int> locate_bucket(byte_range string) const {
         uint64_t p = m_pool.lower_bound(string);
-        return {access_header(p), false, p};  // TODO: fixme
+        return {m_pool.access(p), false, p};  // TODO: fixme
 
         // int lo = p, hi = buckets() - 1 - p, mi = 0, cmp = 0;
         // byte_range header;
@@ -252,7 +220,7 @@ private:
 
     uint64_t access(uint64_t bucket, uint64_t id, uint8_t* string) const {
         assert(id <= bucket_size(bucket));
-        byte_range header = access_header(bucket);
+        byte_range header = m_pool.access(bucket);
         memcpy(string, header.begin, constants::max_string_length);
         uint8_t lcp_len;
         uint8_t const* curr = m_data.data() + m_buckets_offsets[bucket];

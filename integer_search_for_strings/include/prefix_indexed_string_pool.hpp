@@ -90,8 +90,7 @@ struct prefix_indexed_string_pool {
         assert(i < size());
         auto begin = m_strings_offsets[i];
         auto end = m_strings_offsets[i + 1];
-        uint8_t const* base = reinterpret_cast<uint8_t const*>(m_strings.data());
-        return {base + begin, base + end};
+        return {m_strings.data() + begin, m_strings.data() + end};
     }
 
     uint64_t lower_bound(std::string const& val) const {
