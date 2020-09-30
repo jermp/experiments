@@ -59,17 +59,20 @@ private:
     uint64_t x;
 };
 
-std::vector<std::string> read_string_collection(char const* filename) {
+std::vector<std::string> read_string_collection(char const* filename, uint64_t min_string_len,
+                                                uint64_t max_string_len) {
     std::ifstream input(filename);
     std::string s;
     uint64_t max_string_length = 0;
     uint64_t sum_of_lengths = 0;
     std::vector<std::string> strings;
     while (std::getline(input, s)) {
-        if (s.size() > max_string_length) max_string_length = s.size();
-        sum_of_lengths += s.size();
-        strings.push_back(s);
-        if (strings.size() % 1000000 == 0) {
+        if (s.size() >= min_string_len and s.size() < max_string_len) {
+            if (s.size() > max_string_length) max_string_length = s.size();
+            sum_of_lengths += s.size();
+            strings.push_back(s);
+        }
+        if (strings.size() and strings.size() % 1000000 == 0) {
             std::cout << "read " << strings.size() << " strings" << std::endl;
         }
     }

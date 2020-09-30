@@ -7,12 +7,13 @@
 
 #include "util.hpp"
 
-/* A pool of strings indexed by their integer prefixes of size (at most) 8. */
+/* A pool of strings indexed by their integer prefixes of size 8.
+    It is assumed that all strings are of size > 8, so that we store
+    common prefixes of size 8 once and keep only the string suffixes.
+*/
 
-struct prefix_indexed_string_pool {
+struct prefix_indexed_string_pool_v3 {
     typedef uint32_t pointer_type;
-    typedef uint64_t prefix_type;
-    static const uint32_t bits = sizeof(prefix_type) * 8;
 
     struct builder {
         builder(uint64_t num_strings = 0) {
@@ -24,6 +25,7 @@ struct prefix_indexed_string_pool {
         void build(Iterator begin, uint64_t n) {
             for (uint64_t i = 0; i != n; ++i, ++begin) {
                 auto str = *begin;
+                assert(str.size() > 8);
                 append(byte_range_from_string(str));
                 if (m_strings.size() > (uint64_t(1) << (sizeof(pointer_type) * 8))) {
                     throw std::runtime_error(std::to_string(sizeof(pointer_type) * 8) +
@@ -31,14 +33,14 @@ struct prefix_indexed_string_pool {
                 }
 
                 // keep only distinct integer prefixes
-                prefix_type x = string_to_uint<bits>(str);
+                uint64_t x = string_to_uint<64>(str);
                 if (m_prefixes.empty()) {
                     m_pointers.push_back(0);
                     m_prefixes.push_back(x);
                     continue;
                 }
 
-                static const uint64_t C = 32;
+                static const uint64_t C = 0;
                 if (m_prefixes.back() != x and i - m_pointers.back() > C) {
                     m_pointers.push_back(i);
                     m_prefixes.push_back(x);
@@ -53,11 +55,13 @@ struct prefix_indexed_string_pool {
         }
 
         void append(byte_range br) {
-            m_strings.insert(m_strings.end(), br.begin, br.end);
+            m_strings.insert(m_strings.end(),
+                             br.begin + 8,  // string size is at least 8 by assumption
+                             br.end);
             m_strings_offsets.push_back(m_strings.size());
         }
 
-        void build(prefix_indexed_string_pool& pool) {
+        void build(prefix_indexed_string_pool_v3& pool) {
             pool.m_prefixes.swap(m_prefixes);
             pool.m_pointers.swap(m_pointers);
             pool.m_strings_offsets.swap(m_strings_offsets);
@@ -73,13 +77,13 @@ struct prefix_indexed_string_pool {
         }
 
     private:
-        std::vector<prefix_type> m_prefixes;
+        std::vector<uint64_t> m_prefixes;
         std::vector<pointer_type> m_pointers;
         std::vector<pointer_type> m_strings_offsets;
         std::vector<uint8_t> m_strings;
     };
 
-    prefix_indexed_string_pool() {}
+    prefix_indexed_string_pool_v3() {}
 
     uint64_t size() const {
         assert(m_strings_offsets.size() > 0);
@@ -94,13 +98,26 @@ struct prefix_indexed_string_pool {
         return {base + begin, base + end};
     }
 
+    inline bool byte_range_compare_v3(byte_range l, byte_range r) const {
+        uint64_t x1 = byte_range_to_uint64(l);
+        uint64_t y1 = byte_range_to_uint64(r);
+        if (x1 != y1) return x1 < y1;
+        return byte_range_compare(l, r) < 0;
+    }
+
+    byte_range byte_range_from_string8(std::string const& str) const {
+        const uint8_t* buf = reinterpret_cast<uint8_t const*>(str.c_str() + 8);
+        const uint8_t* end = buf + str.size() - 8;  // exclude the null terminator
+        return {buf, end};
+    }
+
     uint64_t lower_bound(std::string const& val) const {
         // This first search is 5X faster than the overall process,
         // so we should not spend time in making it faster.
         // We should, instead, devise a faster solution to search
         // through a (medium-short) range of strings,
         // which is the step performed after this search.
-        prefix_type x = string_to_uint<bits>(val);
+        uint64_t x = string_to_uint<64>(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
         uint64_t begin = m_pointers[p ? p - 1 : p];
@@ -131,14 +148,14 @@ struct prefix_indexed_string_pool {
         int64_t step = 0;
         uint64_t i = begin;
         uint64_t ret = begin;
-        auto target = byte_range_from_string(val);
+        auto target = byte_range_from_string8(val);
         while (count > 0) {
             i = ret;
             step = count / 2;
             i += step;
 
             /* this is faster than traditional string compare as below */
-            bool less = byte_range_compare_v2(access(i), target);
+            bool less = byte_range_compare_v3(access(i), target);
             // bool less = byte_range_compare(access(i), target) < 0;
 
             if (less) {
@@ -171,48 +188,8 @@ struct prefix_indexed_string_pool {
         // return ret;
     }
 
-    uint64_t lower_bound(
-        std::vector<std::string> const&
-            strings,  // WARNING: this should be the same collection that was used to build the
-                      // prefixes. It is passed here as input parameter just for testing.
-        std::string const& val) const {
-        prefix_type x = string_to_uint<bits>(val);
-        auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
-        uint64_t p = std::distance(m_prefixes.begin(), it);
-        uint64_t begin = m_pointers[p ? p - 1 : p];
-        uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
-        assert(end > begin);
-        int64_t count = end - begin;
-        // return count;
-
-        // if (count < 128) {
-        //     for (uint64_t i = begin; i != end; ++i) {
-        //         if (strings[i] >= val) return i;
-        //     }
-        //     return end;
-        // }
-
-        int64_t step = 0;
-        uint64_t i = begin;
-        uint64_t ret = begin;
-        while (count > 0) {
-            i = ret;
-            step = count / 2;
-            i += step;
-            // bool less = strings[i] < val;
-            bool less = string_compare_v2(strings[i], val);
-            if (less) {
-                ret = ++i;
-                count -= step + 1;
-            } else {
-                count = step;
-            }
-        }
-        return ret;
-    }
-
 private:
-    std::vector<prefix_type> m_prefixes;
+    std::vector<uint64_t> m_prefixes;
     std::vector<pointer_type> m_pointers;
     std::vector<pointer_type> m_strings_offsets;
     std::vector<uint8_t> m_strings;
