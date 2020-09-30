@@ -6,6 +6,7 @@
 #include "include/prefix_indexed_string_pool.hpp"
 #include "include/prefix_indexed_string_pool_v2.hpp"
 #include "include/prefix_indexed_string_pool_v3.hpp"
+#include "include/front_coded_dictionary.hpp"
 
 static const uint64_t prefix_size = 8;
 typedef std::chrono::microseconds duration_type;
@@ -133,6 +134,22 @@ int main(int argc, char const** argv) {
         std::cout << "elapsed " << elapsed.count() << std::endl;
         std::cout << "##ignore " << sum << std::endl;
         std::cout << "bytes: " << pool.bytes() << std::endl;
+    }
+
+    {
+        // measure time for binary search on a front_coded_dictionary
+        typedef front_coded_dictionary<16> fc_dict_type;
+        fc_dict_type::builder builder;
+        fc_dict_type dict;
+        builder.build(strings.begin(), strings.size());
+        builder.build(dict);
+        uint64_t sum = 0;
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto q : queries) sum += dict.lower_bound(byte_range_from_string(strings[q]));
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+        std::cout << "elapsed " << elapsed.count() << std::endl;
+        std::cout << "##ignore " << sum << std::endl;
     }
 
     return 0;

@@ -98,13 +98,6 @@ struct prefix_indexed_string_pool_v3 {
         return {base + begin, base + end};
     }
 
-    inline bool byte_range_compare_v3(byte_range l, byte_range r) const {
-        uint64_t x1 = byte_range_to_uint64(l);
-        uint64_t y1 = byte_range_to_uint64(r);
-        if (x1 != y1) return x1 < y1;
-        return byte_range_compare(l, r) < 0;
-    }
-
     byte_range byte_range_from_string8(std::string const& str) const {
         const uint8_t* buf = reinterpret_cast<uint8_t const*>(str.c_str() + 8);
         const uint8_t* end = buf + str.size() - 8;  // exclude the null terminator
@@ -155,7 +148,7 @@ struct prefix_indexed_string_pool_v3 {
             i += step;
 
             /* this is faster than traditional string compare as below */
-            bool less = byte_range_compare_v3(access(i), target);
+            bool less = byte_range_compare_v2(access(i), target);
             // bool less = byte_range_compare(access(i), target) < 0;
 
             if (less) {

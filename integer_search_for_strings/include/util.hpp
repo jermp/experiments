@@ -12,6 +12,11 @@
 #include <immintrin.h>  // for __builtin_bswap64
 #include <cstring>
 
+namespace constants {
+static const uint64_t max_string_length = 256;
+static const uint64_t invalid_id = -1;
+}  // namespace constants
+
 struct byte_range {
     uint8_t const* begin;
     uint8_t const* end;
