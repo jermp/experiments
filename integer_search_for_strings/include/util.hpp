@@ -38,6 +38,10 @@ byte_range byte_range_from_string(std::string const& str) {
     return {buf, end};
 }
 
+std::string string_from_byte_range(byte_range br) {
+    return std::string(br.begin, br.end);
+}
+
 template <uint64_t string_size>
 byte_range byte_range_from_string(std::string const& str) {
     const uint8_t* buf = reinterpret_cast<uint8_t const*>(str.c_str());

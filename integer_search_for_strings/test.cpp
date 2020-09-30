@@ -37,19 +37,19 @@ int main(int argc, char const** argv) {
 
     // for (auto& s : strings) s.resize(prefix_size);
 
-    {
-        // measure time for binary search on std::vector<std::string>
-        uint64_t sum = 0;
-        auto start = std::chrono::high_resolution_clock::now();
-        for (auto q : queries) {
-            auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
-            sum += std::distance(strings.begin(), it);
-        }
-        auto stop = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
-        std::cout << "elapsed " << elapsed.count() << std::endl;
-        std::cout << "##ignore " << sum << std::endl;
-    }
+    // {
+    //     // measure time for binary search on std::vector<std::string>
+    //     uint64_t sum = 0;
+    //     auto start = std::chrono::high_resolution_clock::now();
+    //     for (auto q : queries) {
+    //         auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
+    //         sum += std::distance(strings.begin(), it);
+    //     }
+    //     auto stop = std::chrono::high_resolution_clock::now();
+    //     auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+    //     std::cout << "elapsed " << elapsed.count() << std::endl;
+    //     std::cout << "##ignore " << sum << std::endl;
+    // }
 
     {
         // measure time for binary search on contiguous strings
@@ -120,22 +120,23 @@ int main(int argc, char const** argv) {
     //     std::cout << "##ignore " << sum << std::endl;
     // }
 
-    {
-        // measure time for binary search on prefix_indexed_string_pool_v3 that assumes all strings
-        // to be longer than 8
-        prefix_indexed_string_pool_v3::builder builder(n);
-        prefix_indexed_string_pool_v3 pool;
-        builder.build(strings.begin(), strings.size());
-        builder.build(pool);
-        uint64_t sum = 0;
-        auto start = std::chrono::high_resolution_clock::now();
-        for (auto q : queries) sum += pool.lower_bound(strings[q]);
-        auto stop = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
-        std::cout << "elapsed " << elapsed.count() << std::endl;
-        std::cout << "##ignore " << sum << std::endl;
-        std::cout << "bytes: " << pool.bytes() << std::endl;
-    }
+    // {
+    //     // measure time for binary search on prefix_indexed_string_pool_v3 that assumes all
+    //     strings
+    //     // to be longer than 8
+    //     prefix_indexed_string_pool_v3::builder builder(n);
+    //     prefix_indexed_string_pool_v3 pool;
+    //     builder.build(strings.begin(), strings.size());
+    //     builder.build(pool);
+    //     uint64_t sum = 0;
+    //     auto start = std::chrono::high_resolution_clock::now();
+    //     for (auto q : queries) sum += pool.lower_bound(strings[q]);
+    //     auto stop = std::chrono::high_resolution_clock::now();
+    //     auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+    //     std::cout << "elapsed " << elapsed.count() << std::endl;
+    //     std::cout << "##ignore " << sum << std::endl;
+    //     std::cout << "bytes: " << pool.bytes() << std::endl;
+    // }
 
     {
         // measure time for binary search on a front_coded_dictionary
@@ -146,7 +147,7 @@ int main(int argc, char const** argv) {
         builder.build(dict);
         uint64_t sum = 0;
         auto start = std::chrono::high_resolution_clock::now();
-        for (auto q : queries) sum += dict.lower_bound(byte_range_from_string(strings[q]));
+        for (auto q : queries) sum += dict.lookup(byte_range_from_string(strings[q]));
         auto stop = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;
@@ -162,7 +163,7 @@ int main(int argc, char const** argv) {
         builder.build(dict);
         uint64_t sum = 0;
         auto start = std::chrono::high_resolution_clock::now();
-        for (auto q : queries) sum += dict.lower_bound(byte_range_from_string(strings[q]));
+        for (auto q : queries) sum += dict.lookup(byte_range_from_string(strings[q]));
         auto stop = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;

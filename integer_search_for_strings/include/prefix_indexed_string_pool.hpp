@@ -195,6 +195,7 @@ struct prefix_indexed_string_pool {
                 count = step;
             }
         }
+        assert(ret <= size());
         return ret;
     }
 

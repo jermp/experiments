@@ -105,7 +105,10 @@ struct prefix_indexed_front_coded_dictionary {
         uint64_t base = bucket * (BucketSize + 1);
         if (string_is_header) return base;
         uint64_t offset = lookup(string, header, bucket);
-        if (offset == constants::invalid_id) return constants::invalid_id;
+        if (offset == constants::invalid_id) {
+            assert(false);
+            return constants::invalid_id;
+        }
         return base + offset;
     }
 
@@ -152,31 +155,23 @@ private:
 
     std::tuple<byte_range, bool, int> locate_bucket(byte_range string) const {
         uint64_t p = m_pool.lower_bound(string);
-        return {m_pool.access(p), false, p};  // TODO: fixme
 
-        // int lo = p, hi = buckets() - 1 - p, mi = 0, cmp = 0;
-        // byte_range header;
-        // int bucket;
-        // while (lo <= hi) {
-        //     mi = (lo + hi) / 2;
-        //     header = access_header(mi);
-        //     cmp = byte_range_compare(header, string);
-        //     if (cmp > 0) {
-        //         hi = mi - 1;
-        //     } else if (cmp < 0) {
-        //         lo = mi + 1;
-        //     } else {
-        //         bucket = mi;
-        //         return {header, true, bucket};
-        //     }
-        // }
-        // if (cmp < 0) {
-        //     bucket = mi;
-        // } else {
-        //     bucket = hi == -1 ? 0 : hi;
-        //     header = access_header(bucket);
-        // }
-        // return {header, false, bucket};
+        bool last = false;
+        if (p == buckets()) {
+            p -= 1;
+            last = true;
+        }
+        auto header = m_pool.access(p);
+        // std::cout << "header '" << string_from_byte_range(header) << "'" << std::endl;
+        if (byte_range_compare(header, string) == 0) return {header, true, p};
+
+        if (p > 0 and !last) p -= 1;
+        header = m_pool.access(p);
+
+        // std::cout << "header '" << string_from_byte_range(header) << "'" << std::endl;
+        // std::cout << "string '" << string_from_byte_range(string) << "'" << std::endl;
+        assert(byte_range_compare(header, string) <= 0);
+        return {header, byte_range_compare(header, string) == 0, p};
     }
 
     uint8_t decode(uint8_t const* in, uint8_t* out, uint8_t* lcp_len) const {
