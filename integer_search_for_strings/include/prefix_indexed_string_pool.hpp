@@ -211,6 +211,13 @@ struct prefix_indexed_string_pool {
         return ret;
     }
 
+    uint64_t bytes() const {
+        return m_prefixes.size() * sizeof(m_prefixes.front()) +
+               m_pointers.size() * sizeof(m_pointers.front()) +
+               m_strings_offsets.size() * sizeof(m_strings_offsets.front()) +
+               m_strings.size() * sizeof(m_strings.front());
+    }
+
 private:
     std::vector<prefix_type> m_prefixes;
     std::vector<pointer_type> m_pointers;

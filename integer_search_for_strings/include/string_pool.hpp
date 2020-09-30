@@ -87,6 +87,11 @@ struct string_pool {
         return ret;
     }
 
+    uint64_t bytes() const {
+        return m_endpoints.size() * sizeof(m_endpoints.front()) +
+               m_strings.size() * sizeof(m_strings.front());
+    }
+
 private:
     std::vector<pointer_type> m_endpoints;
     std::vector<uint8_t> m_strings;

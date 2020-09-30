@@ -62,6 +62,7 @@ int main(int argc, char const** argv) {
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;
         std::cout << "##ignore " << sum << std::endl;
+        std::cout << "bytes: " << pool.bytes() << std::endl;
     }
 
     // {
@@ -98,6 +99,7 @@ int main(int argc, char const** argv) {
         elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;
         std::cout << "##ignore " << sum << std::endl;
+        std::cout << "bytes: " << pool.bytes() << std::endl;
     }
 
     // {
@@ -130,6 +132,7 @@ int main(int argc, char const** argv) {
         auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
         std::cout << "elapsed " << elapsed.count() << std::endl;
         std::cout << "##ignore " << sum << std::endl;
+        std::cout << "bytes: " << pool.bytes() << std::endl;
     }
 
     return 0;
