@@ -11,6 +11,8 @@
 
 struct prefix_indexed_string_pool {
     typedef uint32_t pointer_type;
+    typedef uint32_t prefix_type;
+    static const uint32_t bits = sizeof(prefix_type) * 8;
 
     struct builder {
         builder(uint64_t num_strings = 0) {
@@ -29,7 +31,7 @@ struct prefix_indexed_string_pool {
                 }
 
                 // keep only distinct integer prefixes
-                uint64_t x = string_to_uint64(str);
+                prefix_type x = string_to_uint<bits>(str);
                 if (m_prefixes.empty()) {
                     m_pointers.push_back(0);
                     m_prefixes.push_back(x);
@@ -71,7 +73,7 @@ struct prefix_indexed_string_pool {
         }
 
     private:
-        std::vector<uint64_t> m_prefixes;
+        std::vector<prefix_type> m_prefixes;
         std::vector<pointer_type> m_pointers;
         std::vector<pointer_type> m_strings_offsets;
         std::vector<uint8_t> m_strings;
@@ -98,7 +100,7 @@ struct prefix_indexed_string_pool {
         // We should, instead, devise a faster solution to search
         // through a (medium-short) range of strings,
         // which is the step performed after this search.
-        uint64_t x = string_to_uint64(val);
+        prefix_type x = string_to_uint<bits>(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
         uint64_t begin = m_pointers[p ? p - 1 : p];
@@ -106,13 +108,16 @@ struct prefix_indexed_string_pool {
         assert(end > begin);
         int64_t count = end - begin;
 
-        // if (count <= 256)
-        //     return count;  // with this, we improve by 3X, thus indicating that we should
-        //     optimize
-        //                    // for small ranges. build a small trie on the range?
+        /*
+            With this, we improve by 3X, thus indicating that we should optimize
+            for small ranges. Build a small trie on the range?
+        */
+        // if (count <= 256) return count;
 
-        /* Maybe we could re-use the same technique inside the range, essentially
-        making a two/three-level data structure.*/
+        /*
+            Maybe we could re-use the same technique inside the range, essentially
+            making a two/three-level data structure.
+        */
 
         // option 1. small ranges are done via linear search
         // if (count < 256) {
@@ -171,7 +176,7 @@ struct prefix_indexed_string_pool {
             strings,  // WARNING: this should be the same collection that was used to build the
                       // prefixes. It is passed here as input parameter just for testing.
         std::string const& val) const {
-        uint64_t x = string_to_uint64(val);
+        prefix_type x = string_to_uint<bits>(val);
         auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
         uint64_t p = std::distance(m_prefixes.begin(), it);
         uint64_t begin = m_pointers[p ? p - 1 : p];
@@ -207,7 +212,7 @@ struct prefix_indexed_string_pool {
     }
 
 private:
-    std::vector<uint64_t> m_prefixes;
+    std::vector<prefix_type> m_prefixes;
     std::vector<pointer_type> m_pointers;
     std::vector<pointer_type> m_strings_offsets;
     std::vector<uint8_t> m_strings;
