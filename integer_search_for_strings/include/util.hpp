@@ -123,6 +123,15 @@ uint64_t string_to_uint(std::string const& s) {
     return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(s.data()));
 }
 
+template <uint32_t bits>
+uint64_t byte_range_to_uint(byte_range s) {
+    static_assert(bits == 32 or bits == 64);
+    if constexpr (bits == 32) {
+        return __builtin_bswap32(*reinterpret_cast<uint32_t const*>(s.begin));
+    }
+    return __builtin_bswap64(*reinterpret_cast<uint64_t const*>(s.begin));
+}
+
 #include "immintrin.h"
 
 // True if a < b, for unsigned 128 bit integers

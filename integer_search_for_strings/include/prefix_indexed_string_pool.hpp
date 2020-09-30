@@ -95,6 +95,8 @@ struct prefix_indexed_string_pool {
     }
 
     uint64_t lower_bound(std::string const& val) const {
+        return lower_bound(byte_range_from_string(val));
+
         // This first search is 5X faster than the overall process,
         // so we should not spend time in making it faster.
         // We should, instead, devise a faster solution to search
@@ -169,6 +171,32 @@ struct prefix_indexed_string_pool {
         // }
         // while (byte_range_compare_v2(access(ret), target)) ++ret;
         // return ret;
+    }
+
+    uint64_t lower_bound(byte_range val) const {
+        prefix_type x = byte_range_to_uint<bits>(val);
+        auto it = std::lower_bound(m_prefixes.begin(), m_prefixes.end(), x);
+        uint64_t p = std::distance(m_prefixes.begin(), it);
+        uint64_t begin = m_pointers[p ? p - 1 : p];
+        uint64_t end = m_pointers[p == m_prefixes.size() ? p : p + 1];
+        assert(end > begin);
+        int64_t count = end - begin;
+        int64_t step = 0;
+        uint64_t i = begin;
+        uint64_t ret = begin;
+        while (count > 0) {
+            i = ret;
+            step = count / 2;
+            i += step;
+            bool less = byte_range_compare_v2(access(i), val);
+            if (less) {
+                ret = ++i;
+                count -= step + 1;
+            } else {
+                count = step;
+            }
+        }
+        return ret;
     }
 
     uint64_t lower_bound(
