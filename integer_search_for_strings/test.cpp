@@ -23,7 +23,8 @@ int main(int argc, char const** argv) {
         return 1;
     }
 
-    static const uint64_t min_string_len = 8 + 1;
+    // static const uint64_t min_string_len = 8 + 1;
+    static const uint64_t min_string_len = 0;
     static const uint64_t max_string_len = 256 + 1;
     std::vector<std::string> strings =
         read_string_collection(argv[1], min_string_len, max_string_len);
@@ -37,22 +38,24 @@ int main(int argc, char const** argv) {
 
     // for (auto& s : strings) s.resize(prefix_size);
 
-    // {
-    //     // measure time for binary search on std::vector<std::string>
-    //     uint64_t sum = 0;
-    //     auto start = std::chrono::high_resolution_clock::now();
-    //     for (auto q : queries) {
-    //         auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
-    //         sum += std::distance(strings.begin(), it);
-    //     }
-    //     auto stop = std::chrono::high_resolution_clock::now();
-    //     auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
-    //     std::cout << "elapsed " << elapsed.count() << std::endl;
-    //     std::cout << "##ignore " << sum << std::endl;
-    // }
+    {
+        // measure time for binary search on std::vector<std::string>
+        std::cout << "====\n";
+        uint64_t sum = 0;
+        auto start = std::chrono::high_resolution_clock::now();
+        for (auto q : queries) {
+            auto it = std::lower_bound(strings.begin(), strings.end(), strings[q]);
+            sum += std::distance(strings.begin(), it);
+        }
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<duration_type>(stop - start);
+        std::cout << "elapsed " << elapsed.count() << std::endl;
+        std::cout << "##ignore " << sum << std::endl;
+    }
 
     {
         // measure time for binary search on contiguous strings
+        std::cout << "====\n";
         string_pool::builder builder(n);
         string_pool pool;
         builder.build(strings.begin(), strings.size());
@@ -82,6 +85,7 @@ int main(int argc, char const** argv) {
 
     {
         // measure time for binary search on prefix_indexed_string_pool
+        std::cout << "====\n";
         prefix_indexed_string_pool::builder builder(n);
         prefix_indexed_string_pool pool;
         builder.build(strings.begin(), strings.size());
@@ -94,6 +98,7 @@ int main(int argc, char const** argv) {
         std::cout << "elapsed " << elapsed.count() << std::endl;
         std::cout << "##ignore " << sum << std::endl;
 
+        std::cout << "====\n";
         sum = 0;
         start = std::chrono::high_resolution_clock::now();
         for (auto q : queries) sum += pool.lower_bound(strings, strings[q]);
@@ -140,6 +145,7 @@ int main(int argc, char const** argv) {
 
     {
         // measure time for binary search on a front_coded_dictionary
+        std::cout << "====\n";
         typedef front_coded_dictionary<16> fc_dict_type;
         fc_dict_type::builder builder;
         fc_dict_type dict;
@@ -156,6 +162,7 @@ int main(int argc, char const** argv) {
 
     {
         // measure time for binary search on a prefix_indexed_front_coded_dictionary
+        std::cout << "====\n";
         typedef prefix_indexed_front_coded_dictionary<16> fc_dict_type;
         fc_dict_type::builder builder;
         fc_dict_type dict;
