@@ -3,6 +3,7 @@
 #include <chrono>
 #include <random>
 #include <fstream>
+#include <sstream>
 
 typedef std::chrono::high_resolution_clock clock_type;
 typedef std::chrono::microseconds duration_type;
@@ -55,6 +56,7 @@ void write_to_file(std::vector<std::vector<uint32_t>> const& collection,
     auto start = clock_type::now();
     std::ofstream out(output_filename.c_str());
     if (!out.is_open()) throw std::runtime_error("cannot open output file");
+    // std::stringstream out; // similar results for std::stringstream
     for (auto const& vec : collection) f(vec, out);
     out.close();
     auto stop = clock_type::now();
