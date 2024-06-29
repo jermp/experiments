@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(EXPERIMENTS)
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -33,3 +33,4 @@ add_executable(cache_aliasing cache_aliasing/test.cpp)
 add_executable(cache_usage cache_usage/test.cpp)
 add_executable(memmove memmove/test.cpp)
 add_executable(integer_search_for_strings integer_search_for_strings/test.cpp)
+add_executable(bin_to_char_conversion bin_to_char_conversion/test.cpp)
