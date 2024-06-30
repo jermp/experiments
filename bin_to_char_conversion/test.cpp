@@ -76,6 +76,8 @@ int main(int argc, char const** argv) {
     const std::string output_filename = argv[3];
     if (!num_vectors) return 1;
 
+    // std::ios_base::sync_with_stdio(false);
+
     auto start = clock_type::now();
     auto collection = get_collection(num_vectors);
     auto stop = clock_type::now();

@@ -29,3 +29,5 @@ Here are some performance numbers on MacBook Pro with a 2.3 GHz Dual-Core Intel 
 	elapsed time: 7 [millisec]
 	
 Conclusions: a manual conversion function can be nearly 10X faster than `operator<<`, but directly writing binary data is so much faster (here, more than 400X faster).
+
+**Note:** `std::ios_base::sync_with_stdio(false);` makes no difference in this benchmark (at least on my laptop with the aforementioned processor), since there is nothing to sync anyway. 
